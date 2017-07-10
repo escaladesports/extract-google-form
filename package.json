@@ -5,11 +5,12 @@
   "license": "MIT",
   "author": "Kennedy Rose <kennedy@escaladesports.com>",
   "scripts": {
-	 "dev": "node index",
-	 "test": "node index"
+    "test": "node test",
+    "dev": "node test"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
-    "isomorphic-fetch": "^2.2.1"
+    "isomorphic-fetch": "^2.2.1",
+    "meow": "^3.7.0"
   }
 }

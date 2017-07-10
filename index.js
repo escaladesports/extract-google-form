@@ -6,13 +6,13 @@ module.exports = opt => {
 		iframeId: 'googleFormIframe',
 		type: 'iframe',
 		onSubmit: 'Thank you for your submission!',
-		cb: console.log
+		res: {
+			input: []
+		}
 	})
 
-	fetchPage(opt)
+	return fetchPage(opt)
 		.then(parsePage)
-		.then(opt.cb)
-		.catch(console.error)
 
 }
 
@@ -39,44 +39,34 @@ function parsePage(opt){
 	const $ = cheerio.load(opt.text)
 	const inputs = $.html('form [name]:not([name="draftResponse"], [name="pageHistory"], [name="fbzx"], [name="fvv"])')
 	const form = $('form')
-	form.html(inputs)
-	form.append('<input type="submit" value="Send" />')
-	const formEls = $('form, input, textarea, select, option')
-	formEls.removeAttr('target')
-		.removeAttr('id')
-		.removeAttr('class')
-		.removeAttr('data-initial-value')
-		.removeAttr('data-initial-dir')
-		.removeAttr('dir')
-		.removeAttr('jsname')
-		.removeAttr('jscontroller')
-		.removeAttr('jsaction')
-		.removeAttr('tabindex')
-		.removeAttr('data-rows')
-		.removeAttr('autocomplete')
-		.removeAttr('aria-describedby')
 
-	// Insert iframe
-	if(opt.type === 'iframe'){
-		form.attr('target', opt.iframeId)
-		form.append('<iframe style="display:none"></iframe>')
-		const iframe = $('iframe')
-		iframe.attr('id', opt.iframeId)
-		if(opt.onSubmit){
-			iframe.attr('onload', `document.getElementById(${opt.formId}).textContent="${opt.onSubmit}"`)
+	$('span').remove()
+
+	opt.res.post = form.attr('action')
+
+	$('form [role="listitem"]').each(function(){
+
+		let el = $(this)
+
+		const heading = el.find('[role="heading"]').text()
+		const name = el.find('[name]').attr('name')
+		if(heading){
+			opt.res.input.push({
+				heading: heading,
+				name: name
+			})
 		}
-	}
-	if(opt.formId){
-		form.attr('id', opt.formId)
-	}
 
-	let str = $.html('form')
-	str = str.replace(/&quot;/g, '\\"')
+	})
 
-	return str
+	return opt.res
+
 }
 
 
-module.exports({
-		url: 'https://docs.google.com/forms/d/e/1FAIpQLSddJdEE9L33vj_jJqh3joHL2SdPX8A95Tj900YK3P4G98NNWw/viewform'
-	})
+function findHeading(el){
+	let header
+	console.log(el.parent().length)
+
+	return el.find('[role="heading"]')
+}

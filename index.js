@@ -2,6 +2,8 @@ const cheerio = require('cheerio')
 const fetch = require('isomorphic-fetch')
 module.exports = opt => {
 	opt = Object.assign(opt, {
+		formId: 'googleForm',
+		iframeId: 'googleFormIframe',
 		type: 'iframe',
 		onSubmit: 'Thank you for your submission!',
 		cb: console.log
@@ -56,13 +58,20 @@ function parsePage(opt){
 
 	// Insert iframe
 	if(opt.type === 'iframe'){
-		form.attr('target', 'hiddenIframe')
+		form.attr('target', opt.iframeId)
+		form.append('<iframe style="display:none"></iframe>')
+		const iframe = $('iframe')
+		iframe.attr('id', opt.iframeId)
+		if(opt.onSubmit){
+			iframe.attr('onload', `document.getElementById(${opt.formId}).textContent="${opt.onSubmit}"`)
+		}
+	}
+	if(opt.formId){
+		form.attr('id', opt.formId)
 	}
 
 	let str = $.html('form')
-	if(opt.type === 'iframe'){
-		str += '<iframe id="hiddenIframe" style="display:none"></iframe>'
-	}
+	str = str.replace(/&quot;/g, '\\"')
 
 	return str
 }

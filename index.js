@@ -7,7 +7,7 @@ module.exports = opt => {
 		type: 'iframe',
 		onSubmit: 'Thank you for your submission!',
 		res: {
-			input: []
+			input: {}
 		}
 	})
 
@@ -39,28 +39,17 @@ function parsePage(opt){
 	const $ = cheerio.load(opt.text)
 	const inputs = $.html('form [name]:not([name="draftResponse"], [name="pageHistory"], [name="fbzx"], [name="fvv"])')
 	const form = $('form')
-
 	$('span').remove()
-
 	opt.res.post = form.attr('action')
-
 	$('form [role="listitem"]').each(function(){
-
 		let el = $(this)
-
 		const heading = el.find('[role="heading"]').text()
 		const name = el.find('[name]').attr('name')
 		if(heading){
-			opt.res.input.push({
-				heading: heading,
-				name: name
-			})
+			opt.res.input[heading.trim()] = name
 		}
-
 	})
-
 	return opt.res
-
 }
 
 
